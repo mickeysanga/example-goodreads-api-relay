@@ -1,14 +1,14 @@
 {
-  "name": "good-relay",
+  "name": "tailfin-framepack-api",
   "version": "1.0.0",
-  "description": "a simple backend relay for hitting the GoodReads API",
+  "description": "API for framepack sizing tool",
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
     "debug": "nodemon --inspect app.js"
   },
-  "author": "Jackson Bates",
+  "author": "Michael Weed",
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.6.4",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gskumawat0/example-goodreads-api-relay.git"
+    "url": "git+https://github.com/mickeysanga/tailfin-framepacks-api"
   },
   "keywords": [
     "secure",
@@ -32,7 +32,7 @@
     "keys"
   ],
   "bugs": {
-    "url": "https://github.com/gskumawat0/example-goodreads-api-relay/issues"
+    "url": "https://github.com/mickeysanga/tailfin-framepacks-api/issues"
   },
-  "homepage": "https://github.com/gskumawat0/example-goodreads-api-relay#readme"
+  "homepage": "https://github.com/mickeysanga/tailfin-framepacks-api#readme"
 }

@@ -92,4 +92,4 @@ app.post("/api/search", async (req, res) => {
 // This spins up our sever and generates logs for us to use.
 // Any console.log statements you use in node for debugging will show up in your
 // terminal, not in the browser console!
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+//app.listen(port, () => console.log(`Example app listening on port ${port}!`));

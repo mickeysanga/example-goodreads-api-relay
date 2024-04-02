@@ -1,6 +1,7 @@
 // These import necessary modules and set some initial variables
 require("dotenv").config();
 const express = require("express");
+const bodyParser = require('body-parser');
 const fetch = require("node-fetch");
 const convert = require("xml-js");
 const rateLimit = require("express-rate-limit");
@@ -19,44 +20,67 @@ const limiter = rateLimit({
   max: 1, // limit each IP to 1 requests per windowMs
 });
 
-//  apply to all requests
-app.use(limiter);
-
-// Allow CORS from any origin
-app.use(cors());
+// Allow CORS from frontend only
+app.use(
+  cors({
+    origin: process.env.TAILFIN_FRONTEND_URL,
+  }),
+  limiter,
+  bodyParser.json({ 
+    limit: "10mb",
+    type: 'application/json'
+  })
+);
 
 // Routes
 
 // Test route, visit localhost:3000 to confirm it's working
 // should show 'Hello World!' in the browser
-app.get("/", (req, res) => res.send("Hello World!"));
+app.get("/", (req, res) => res.sendStatus(404));
 
-// Our Goodreads relay route!
-app.get("/api/search", async (req, res) => {
+app.post("/api/search", async (req, res) => {
   try {
     // This uses string interpolation to make our search query string
     // it pulls the posted query param and reformats it for goodreads
-    const searchString = `q=${req.query.q}`;
-
+    const body = req.body;
     // It uses node-fetch to call the goodreads api, and reads the key from .env
-    const response = await fetch(
-      `https://www.goodreads.com/search/index.xml?key=${process.env.GOODREADS_API_KEY}&${searchString}`,
-    );
-    //more info here https://www.goodreads.com/api/index#search.books
-    const xml = await response.text();
+    // const response = await fetch(
+    //   `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=hourly,daily,minutely&appid=${process.env.OPEN_WEATHER_MAP_KEY}`
+    // );
+    const raw = JSON.stringify({
+            "user_app_id": {
+                "user_id": process.env.CLARIFAI_USER_ID,
+                "app_id": process.env.CLARIFAI_APP_ID
+            },
+            "inputs": [
+                {
+                    "data": {
+                        "image": body
+                    }
+                }
+            ]
+        });
+        
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Key ${process.env.CLARIFAI_PAT}`
+            },
+            body: raw
+        };
 
-    // Goodreads API returns XML, so to use it easily on the front end, we can
-    // convert that to JSON:
-    const json = convert.xml2json(xml, { compact: true, spaces: 2 });
+        const MODEL_ID = process.env.CLARIFAI_MODEL_ID;
+        const MODEL_VERSION = process.env.CLARIFAI_MODEL_VERSION;
 
-    // The API returns stuff we don't care about, so we may as well strip out
-    // everything except the results:
-    const results = JSON.parse(json).GoodreadsResponse.search.results;
+        const response = await fetch(`https://api.clarifai.com/v2/models/${MODEL_ID}/versions/${MODEL_VERSION}/outputs`, requestOptions)
 
-    return res.json({
-      success: true,
-      results,
-    });
+        const json = await response.json();
+
+        return res.json({
+          success: true,
+          json,
+        });
   } catch (err) {
     return res.status(500).json({
       success: false,
